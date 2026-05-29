@@ -15,6 +15,7 @@ const getOrCreateRoom = (roomId) => {
       cameras: new Map(),   // cameraId -> { ws, name, label }
       viewers: new Map(),   // viewerId -> ws
       tallyState: {},       // cameraId -> "program" | "preview" | "idle"
+      slots: [],            // configured camera slots from director
     });
   }
   return rooms.get(roomId);
@@ -84,6 +85,10 @@ wss.on("connection", (ws) => {
           room.cameras.forEach(({ name, label }, cameraId) => {
             send(ws, { type: "camera-connected", cameraId, name, label });
           });
+          // Send configured slots (includes disconnected cameras)
+          if (room.slots.length > 0) {
+            send(ws, { type: "room-slots", slots: room.slots });
+          }
           // Send current tally state
           Object.entries(room.tallyState).forEach(([cameraId, state]) => {
             send(ws, { type: "tally", cameraId, state });
