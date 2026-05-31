@@ -37,6 +37,9 @@ wss.on("connection", (ws) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
+    // Normalize room IDs to uppercase so "ab12cd" and "AB12CD" are the same room
+    if (msg.roomId) msg.roomId = msg.roomId.toUpperCase().trim();
+
     switch (msg.type) {
 
       case "register": {
