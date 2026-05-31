@@ -91,6 +91,9 @@ wss.on("connection", (ws) => {
           // Send configured slots (includes disconnected cameras)
           if (room.slots.length > 0) {
             send(ws, { type: "room-slots", slots: room.slots });
+          } else if (room.director?.readyState === 1) {
+            // No slots cached yet — ask director to resend them
+            send(room.director, { type: "request-slots" });
           }
           // Send current tally state
           Object.entries(room.tallyState).forEach(([cameraId, state]) => {
