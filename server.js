@@ -166,6 +166,20 @@ wss.on("connection", (ws) => {
         break;
       }
 
+      // ── Audio levels (A1 console ↔ director) ─────────────────────────
+      case "audio-level": {
+        const room = rooms.get(clientRoomId);
+        if (!room) break;
+        // Broadcast to director and all viewers so audio consoles stay in sync
+        if (room.director?.readyState === 1) {
+          send(room.director, { type: "audio-level", cameraId: msg.cameraId, volume: msg.volume, muted: msg.muted });
+        }
+        room.viewers.forEach(viewerWs => {
+          send(viewerWs, { type: "audio-level", cameraId: msg.cameraId, volume: msg.volume, muted: msg.muted });
+        });
+        break;
+      }
+
       // ── Rename (director → camera) ─────────────────────────────────
       case "rename": {
         const room = rooms.get(clientRoomId);
